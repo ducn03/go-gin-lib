@@ -11,15 +11,15 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"}, // Add your frontend URL
+		AllowOrigins:     []string{"*"}, // Add your frontend URL
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
-		AllowCredentials: true, // Enable cookies/auth
+		AllowCredentials: false, // Enable cookies/auth
 	}))
 
 	r.GET("/", s.HelloWorldHandler)
 
-	r.GET("/health", s.healthHandler)
+	r.GET("/health", s.HealthHandler)
 
 	return r
 }
@@ -31,6 +31,16 @@ func (s *Server) HelloWorldHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-func (s *Server) healthHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, s.db.Health())
+func (s *Server) HealthHandler(c *gin.Context) {
+	// Gọi hàm Health() từ service database mà ông đã khởi tạo lúc NewServer
+	healthStatus := s.db.Health()
+
+	// Nếu trong map trả về có lỗi, mình có thể trả về status 503 (Service Unavailable)
+	// Hoặc đơn giản là trả về 200 kèm nội dung tình trạng để check cho dễ
+	if status, ok := healthStatus["status"]; ok && status == "down" {
+		c.JSON(http.StatusServiceUnavailable, healthStatus)
+		return
+	}
+
+	c.JSON(http.StatusOK, healthStatus)
 }

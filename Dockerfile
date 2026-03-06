@@ -1,4 +1,5 @@
-FROM golang:1.24.4-alpine AS build
+# Sử dụng bản 1.25 mới nhất trên nền Alpine (siêu nhẹ)
+FROM golang:1.25-alpine AS build
 
 WORKDIR /app
 
