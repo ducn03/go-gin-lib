@@ -11,5 +11,6 @@ func RegisterRoutes(route *gin.RouterGroup) {
 	register := route.Group("/test")
 	{
 		register.GET("", testHandler.TestResponse)
+		register.GET("/redis", testHandler.TestRedis)
 	}
 }

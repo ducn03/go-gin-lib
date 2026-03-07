@@ -9,7 +9,8 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 
-	"go-gin-lib/internal/database"
+	"go-gin-lib/internal/core/database"
+	"go-gin-lib/internal/core/redis"
 )
 
 type Server struct {
@@ -24,6 +25,11 @@ func NewServer() *http.Server {
 		port: port,
 
 		db: database.New(),
+	}
+
+	if err := redis.Connect(); err != nil {
+		// Nếu không có Redis mà app không chạy được thì panic luôn cho an toàn
+		panic(fmt.Sprintf("Khởi tạo Redis thất bại: %v", err))
 	}
 
 	// Declare Server config

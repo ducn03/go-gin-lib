@@ -10,30 +10,33 @@ services:
     environment:
       APP_ENV: ${APP_ENV}
       PORT: ${PORT}
-      BLUEPRINT_DB_HOST: ${BLUEPRINT_DB_HOST}
-      BLUEPRINT_DB_PORT: ${BLUEPRINT_DB_PORT}
-      BLUEPRINT_DB_DATABASE: ${BLUEPRINT_DB_DATABASE}
-      BLUEPRINT_DB_USERNAME: ${BLUEPRINT_DB_USERNAME}
-      BLUEPRINT_DB_PASSWORD: ${BLUEPRINT_DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
     depends_on:
       mysql_bp:
         condition: service_healthy
     networks:
       - blueprint
+
   mysql_bp:
     image: mysql:latest
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: ${BLUEPRINT_DB_DATABASE}
-      MYSQL_USER: ${BLUEPRINT_DB_USERNAME}
-      MYSQL_PASSWORD: ${BLUEPRINT_DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${BLUEPRINT_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     ports:
       - "${DB_LOCAL_PORT}:3306"
     volumes:
       - mysql_volume_bp:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "${BLUEPRINT_DB_HOST}", "-u", "${BLUEPRINT_DB_USERNAME}", "--password=${BLUEPRINT_DB_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "${DB_HOST}", "-u", "${DB_USERNAME}", "--password=${DB_PASSWORD}"]
       interval: 5s
       timeout: 5s
       retries: 3
@@ -41,7 +44,21 @@ services:
     networks:
       - blueprint
 
+  redis:
+    image: ${REDIS_IMAGE}
+    container_name: ${REDIS_CONTAINER_NAME}
+    environment:
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - blueprint
+
 volumes:
   mysql_volume_bp:
+  redis_data:
 networks:
   blueprint:
