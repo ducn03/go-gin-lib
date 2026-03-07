@@ -1,6 +1,7 @@
 package server
 
 import (
+	testRoutes "go-gin-lib/internal/features/test/routes"
 	"net/http"
 
 	"github.com/gin-contrib/cors"
@@ -20,6 +21,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.GET("/", s.HelloWorldHandler)
 
 	r.GET("/health", s.HealthHandler)
+
+	apiPublic := r.Group("/api/public")
+	testRoutes.RegisterRoutes(apiPublic)
 
 	return r
 }
